@@ -1,0 +1,58 @@
+Flow diagram for RDI
+
+Certainly, here is a step-by-step breakdown of the flow diagram in the image:
+
+1. **Input File**: The process begins with an Input File. This file could be a raw data file from various data providers, like the European Central Bank (ECB), European DataWarehouse (EDW), or Bank of England (BoE).
+
+2. **Extraction Map**: This step involves using an "Extraction map template selector" based on the file name, which suggests that the template used for data extraction depends on the naming convention of the input file.
+
+3. **Steps in Extraction Map**: Within the extraction map, there is a series of detailed steps that include:
+   - Identifying the names of the columns in the data.
+   - Determining the datatype of each column.
+   - Converting data into the required format, such as percentages.
+   - Applying loan filters to the data.
+   - Executing MILAN Conversion formulas (mappings), which are likely specific functions or algorithms needed to prepare the data for the MILAN system.
+   - Making any necessary MILAN Adjustments (Calculation/Date), which could involve recalculating certain values or adjusting date-related data.
+
+4. **MILAN Database**: After processing through the extraction map, the data is stored in the MILAN Database. This suggests that the database is designed to hold the data in the new format that has been cleaned and transformed.
+
+5. **MILAN Download**: Data from the MILAN Database is then made available for download, probably for further analysis or distribution. It is mentioned that the download includes a subset of the MILAN Template and the MILAN CLEAN, implying that the data is now in a refined state, meeting the MILAN standards for use.
+
+6. **MILAN Model**: Finally, the cleaned and processed data is used in the MILAN Model. This could be a financial model or risk assessment tool developed by Moody's Investors Service, which utilizes the prepared data for analysis, forecasting, risk assessment, or decision-making.
+
+Throughout this process, the data is transformed from its raw state into a format that can be utilized effectively by the MILAN Model, ensuring accuracy and relevance for the analyses performed by the service.
+
+
+
+2nd Architecture diagram 
+
+This diagram appears to be an architectural overview of a software system that utilizes various components to handle tasks like data processing, API management, and task scheduling.
+
+1. **Celery Beat**: This is a scheduler that kicks off tasks at regular intervals, which are then executed by Celery workers. It likely uses RabbitMQ as a message broker to communicate with the workers.
+
+2. **RabbitMQ**: A message broker that mediates the messages from Celery Beat to Celery Workers. It ensures that tasks are queued and then delivered to workers for execution.
+
+3. **Celery Worker**: These are the processes that actually execute the tasks. They listen for messages from RabbitMQ and process them as they arrive.
+
+4. **Tenants**: This likely refers to different clients or instances within the system that maintain data separation. 
+
+5. **Pre-Processing**: This is a stage where data is prepared before the main processing. It could involve steps like:
+   - File Downloading: Obtaining files necessary for processing.
+   - Rule Add/Map: Applying specific rules or mappings to the data.
+   - File Metadata Creation: Generating metadata for the files.
+
+6. **File Processing**: The core part of the data handling that includes:
+   - Data Validation: Checking data for errors or inconsistencies.
+   - RAW data onboarding: Incorporating raw data into the system for processing.
+
+7. **Post-Processing**: Steps taken after the main processing, which may involve further data manipulation, cleanup, or preparing the data for presentation or storage.
+
+8. **RDI UI APIs**: These are the APIs related to the user interface, allowing interaction with the system's data.
+
+9. **ABP Core Services**: Likely the central services of the system that provide essential functionality to various parts of the architecture.
+
+10. **Data Export APIs**: APIs used for extracting data from the system, possibly for reporting or analysis by external systems.
+
+11. **RDI DB**: The database where all the Resource Description Framework (RDF) data is stored. It could be a central repository that stores the data that is processed and handled by the system.
+
+The arrows indicate the flow of data or commands between the components. It starts with scheduled tasks from Celery Beat, then moves to processing data which involves multiple stages like pre-processing, the main file processing, and finally post-processing. The diagram also includes APIs for interacting with the user interface and for exporting data, indicating how external systems might interact with this architecture.
