@@ -151,4 +151,46 @@ def create_dataintake_data(processor: SftpProcessor,source,istlsenable,protocol,
       description: Updated SFTP data details based on the id.
   """
   resp=processor.create_sftp_date(source,istlsenable,protocol,retainfolderstructure,handlefilewithsamename,overridefile)
-  return api_response.create_response(resp, http.client.OK)
+  return api_response.create_response(resp, http.client.This code snippet defines a Flask blueprint for a Data Intake API, which interacts with a backend (likely dealing with file transfers, given the SFTP context) to perform CRUD (Create, Read, Update, Delete) operations on data resources. It relies on dependency injection to obtain an instance of `SftpProcessor`, a class responsible for the actual data handling logic. The code is structured to handle different HTTP methods (GET, PUT, DELETE, POST) for various API endpoints, enabling the manipulation of data related to SFTP configurations and tasks.
+
+### Blueprint Definition
+- `api_dataintake = Blueprint("api_dataintake", __name__)`: Defines a Flask Blueprint named `api_dataintake`. This acts as a modular way to organize a group of related routes. Flask Blueprints are used for scalability, allowing developers to organize their application into distinct components.
+
+### Dependency Injection
+- `@inject`: A decorator used for dependency injection. It tells the Flask framework to inject dependencies into the view function. Here, it ensures that an instance of `SftpProcessor` is provided to the route handlers.
+
+### Route Handlers
+There are five main route handlers defined within this blueprint:
+
+1. **Get Data by ID**
+   - Endpoint: `/dataintake/<id>/<filtertable>`
+   - Method: GET
+   - Description: Fetches details based on the given `id` from a specified table (`filtertable`) within Data Intake.
+
+2. **Update SFTP Data**
+   - Endpoint: `/sftp/<sftpid>/<source>/<istlsenable>`
+   - Method: PUT
+   - Description: Updates details of SFTP data based on the given `sftpid`. It optionally accepts a `source` and a boolean `istlsenable` to specify if TLS should be enabled.
+
+3. **Get Whole Data from Table**
+   - Endpoint: `/dataintake/<filtertable>`
+   - Method: GET
+   - Description: Fetches all records from a specified table (`filtertable`) within Data Intake.
+
+4. **Delete Data by ID**
+   - Endpoint: `/dataintake/<id>/<filtertable>`
+   - Method: DELETE
+   - Description: Deletes records based on the given `id` from a specified table (`filtertable`) within Data Intake.
+
+5. **Create SFTP Data**
+   - Endpoint: `/sftp/<source>/<istlsenable>/<protocol>/<retainfolderstructure>/<handlefilewithsamename>/<overridefile>`
+   - Method: POST
+   - Description: Creates new SFTP data with detailed configuration options, including `source`, TLS enablement, protocol type, and rules for handling files.
+
+### Functionality
+- Each route handler first processes input parameters (e.g., `id`, `filtertable`, `sftpid`, etc.) and calls the appropriate method on the injected `SftpProcessor` instance to perform the intended operation.
+- The return value from `SftpProcessor` methods is then wrapped in a standardized API response using `api_response.create_response(resp, http.client.OK)`, which formats the response and sets the HTTP status code to 200 (OK).
+
+### Summary
+This blueprint modularizes the Data Intake API's endpoints, focusing on operations related to SFTP data management. It showcases Flask's capabilities for route definition, dependency injection, and modular application design.
+
