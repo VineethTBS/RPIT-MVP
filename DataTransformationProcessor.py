@@ -255,3 +255,9 @@ dealId = filepath.split("_")[1]
 start_time = time.time()
 DealProcessor(filepath,poolId,dealId).SurveillanceDealData()
 print("--- %s seconds ---" % (time.time() - start_time))
+
+
+
+1) [Week 1] Define a input and a output template in excel and ingest this into database and crate python code for all the output macros which exists.
+2) [Week 2] [LLM Usecase] Using existing code you should be able to convert the code/script or logic to any other format.
+3) [Week 3] Using LLM and english like statements/prompts we should be able to transform the data.
