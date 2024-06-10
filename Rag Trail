@@ -1,0 +1,116 @@
+ # Replace with the actual import statement for your local Ollama
+import pandas as pd 
+
+from llama_index.query_pipeline import (
+    QueryPipeline as QP,
+    Link,
+    InputComponent,
+)
+from llama_index.query_engine.pandas import PandasInstructionParser
+from llama_index.llms import OpenAI
+from llama_index.prompts import PromptTemplate
+
+df = pd.read_csv("/content/titanic_train.csv")
+
+# Define the instruction and prompt templates
+instruction_str = (
+    "1. Extract the formula from the given Excel sheet.\n"
+    "2. Return the Python code using Pandas to extract the formula.\n"
+    "3. The final line of code should be a Python expression that can be called with the `eval()` function.\n"
+    "4. PRINT ONLY THE EXPRESSION.\n"
+    "5. Do not quote the expression.\n"
+)
+
+pandas_prompt_str = (
+    "You are working with an Excel sheet and you need to extract formulas using Pandas.\n"
+    "Follow these instructions:\n"
+    "{instruction_str}\n"
+    "Query: {query_str}\n\n"
+    "Expression:"
+)
+
+response_synthesis_prompt_str = (
+    "Given an input question, synthesize a response from the query results.\n"
+    "Query: {query_str}\n\n"
+    "Pandas Instructions (optional):\n{pandas_instructions}\n\n"
+    "Pandas Output: {pandas_output}\n\n"
+    "Response: "
+)
+
+# Define a function to partial format the prompt templates
+
+
+def partial_format(template_str, **kwargs):
+    return template_str.format(**kwargs)
+
+# Define the PromptTemplate class for formatting prompts
+
+
+class PromptTemplate:
+    def __init__(self, template_str):
+        self.template_str = template_str
+
+    def partial_format(self, **kwargs):
+        return partial_format(self.template_str, **kwargs)
+
+# Define the PandasInstructionParser class for parsing Pandas instructions
+
+
+class PandasInstructionParser:
+    def __init__(self, df):
+        self.df = df
+
+    def parse(self, instructions):
+        exec(instructions)
+        return eval(instructions.split('\n')[-1])
+
+
+# Instantiate your local Ollama model
+ollama = Ollama(model="your-local-ollama-model")
+
+# Partial format the prompts
+pandas_prompt = PromptTemplate(pandas_prompt_str).partial_format(
+    instruction_str=instruction_str
+)
+response_synthesis_prompt = PromptTemplate(response_synthesis_prompt_str)
+
+# Define the query pipeline using Ollama
+query_pipeline = QP(
+    modules={
+        "input": InputComponent(),
+        "pandas_prompt": pandas_prompt,
+        "llm1": ollama,
+        "pandas_output_parser": PandasInstructionParser,
+        "response_synthesis_prompt": response_synthesis_prompt,
+        "llm2": ollama,
+    },
+    verbose=True,
+)
+
+# Add chains and links to the query pipeline
+query_pipeline.add_chain(
+    ["input", "pandas_prompt", "llm1", "pandas_output_parser"])
+query_pipeline.add_links(
+    [
+        Link("input", "response_synthesis_prompt", dest_key="query_str"),
+        Link("llm1", "response_synthesis_prompt",
+             dest_key="pandas_instructions"),
+        Link("pandas_output_parser", "response_synthesis_prompt",
+             dest_key="pandas_output"),
+    ]
+)
+query_pipeline.add_link("response_synthesis_prompt", "llm2")
+
+# Define a function to run the query pipeline
+
+
+def run_query_pipeline(query):
+    response = query_pipeline.run(query)
+    return response
+
+
+# Example usage
+query = "extract formula from sheet"
+response = run_query_pipeline(query)
+
+print(response)
