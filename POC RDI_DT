@@ -387,3 +387,51 @@ def getVlookup(self, start, end):
     return df
 
 
+import re
+import pandas as pd
+from openpyxl import load_workbook
+
+def getVlookup(self, start, end):
+    wb = load_workbook(self.fileData)  # Load the workbook without read_only
+
+    ws = wb[wb.sheetnames[0]]  # Get the first sheet
+
+    # Extract column letters and row numbers
+    start_col_match = re.findall(r'[A-Z]+', start)
+    start_row_match = re.findall(r'\d+', start)
+    end_col_match = re.findall(r'[A-Z]+', end)
+    end_row_match = re.findall(r'\d+', end)
+
+    # Set default row numbers if not provided
+    default_start_row = 1
+    default_end_row = ws.max_row
+
+    # Convert column letters to column indices and rows to integers
+    if start_col_match:
+        start_col = self.col2num(start_col_match[0])
+    else:
+        raise ValueError(f"Invalid start cell reference: {start}")
+
+    start_row = int(start_row_match[0]) if start_row_match else default_start_row
+
+    if end_col_match:
+        end_col = self.col2num(end_col_match[0])
+    else:
+        raise ValueError(f"Invalid end cell reference: {end}")
+
+    end_row = int(end_row_match[0]) if end_row_match else default_end_row
+
+    # Read the cell values into a list of lists
+    data_rows = []
+    for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col, values_only=True):
+        data_cols = []
+        for cell in row:
+            data_cols.append(cell)
+        data_rows.append(data_cols)
+
+    # Transform into dataframe
+    df = pd.DataFrame(data_rows)
+    return df
+
+
+
