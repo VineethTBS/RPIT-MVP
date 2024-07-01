@@ -322,3 +322,27 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 'ReadOnlyWorksheet' object has no attribute 'iter_cols'
+
+
+
+def getVlookup(self, start, end):
+    wb = load_workbook(self.fileData)  # Load the workbook without read_only
+
+    ws = wb[wb.sheetnames[0]]  # Get the first sheet
+
+    # Convert column letters to column indices
+    start_col, start_row = self.col2num(re.findall(r'[A-Z]+', start)[0]), int(re.findall(r'\d+', start)[0])
+    end_col, end_row = self.col2num(re.findall(r'[A-Z]+', end)[0]), int(re.findall(r'\d+', end)[0])
+
+    # Read the cell values into a list of lists
+    data_rows = []
+    for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col, values_only=True):
+        data_cols = []
+        for cell in row:
+            data_cols.append(cell)
+        data_rows.append(data_cols)
+
+    # Transform into dataframe
+    df = pd.DataFrame(data_rows)
+    return df
+
