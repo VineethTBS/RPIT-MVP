@@ -318,3 +318,7 @@ print(poolId)
 print(dealId)
 DealProcessor(filepath,poolId,dealId).PrimaryDealData()
 print("--- %s seconds ---" % (time.time() - start_time))
+
+
+
+'ReadOnlyWorksheet' object has no attribute 'iter_cols'
