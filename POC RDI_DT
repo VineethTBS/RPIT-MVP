@@ -440,14 +440,22 @@ def getVlookup(self, start, end):
 
     ws = wb[wb.sheetnames[0]]
 
-    # Convert column letters to indices
-    start_col, start_row = re.match(r"([A-Z]+)(\d+)", start).groups()
-    end_col, end_row = re.match(r"([A-Z]+)(\d+)", end).groups()
+    # Function to convert cell reference (e.g., 'A1') to column and row numbers
+    def cell_ref_to_indices(cell_ref):
+        match = re.match(r"([A-Z]+)(\d+)", cell_ref)
+        if not match:
+            raise ValueError(f"Invalid cell reference: {cell_ref}")
+        col, row = match.groups()
+        col_idx = self.col2num(col)
+        row_idx = int(row)
+        return col_idx, row_idx
 
-    start_col = self.col2num(start_col)
-    start_row = int(start_row)
-    end_col = self.col2num(end_col)
-    end_row = int(end_row)
+    try:
+        start_col, start_row = cell_ref_to_indices(start)
+        end_col, end_row = cell_ref_to_indices(end)
+    except ValueError as e:
+        print(e)
+        return None
 
     # Read the cell values into a list of lists using iter_rows
     data_rows = []
@@ -457,6 +465,7 @@ def getVlookup(self, start, end):
     # Transform into dataframe
     df = pd.DataFrame(data_rows)
     return df
+
 
 
 
