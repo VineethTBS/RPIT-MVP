@@ -435,3 +435,28 @@ def getVlookup(self, start, end):
 
 
 
+def getVlookup(self, start, end):
+    wb = load_workbook(self.fileData)  # Removed read_only=True
+
+    ws = wb[wb.sheetnames[0]]
+
+    # Convert column letters to indices
+    start_col, start_row = re.match(r"([A-Z]+)(\d+)", start).groups()
+    end_col, end_row = re.match(r"([A-Z]+)(\d+)", end).groups()
+
+    start_col = self.col2num(start_col)
+    start_row = int(start_row)
+    end_col = self.col2num(end_col)
+    end_row = int(end_row)
+
+    # Read the cell values into a list of lists using iter_rows
+    data_rows = []
+    for row in ws.iter_rows(min_row=start_row, max_row=end_row, min_col=start_col, max_col=end_col, values_only=True):
+        data_rows.append(list(row))
+
+    # Transform into dataframe
+    df = pd.DataFrame(data_rows)
+    return df
+
+
+
