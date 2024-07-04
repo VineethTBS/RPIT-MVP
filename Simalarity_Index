@@ -1,0 +1,91 @@
+
+import urllib.parse
+import boto3
+import pandas as pd
+import io 
+from Processor import DealProcessor
+import time
+
+import datetime
+import pandas as pd
+import collections
+from openpyxl import load_workbook
+import datetime
+
+
+
+class DealProcessor: 
+    def __init__(self, filedata, poolId, dealId):
+        self.fileData = filedata
+        self.poolId = poolId
+        self.dealId = dealId
+
+    def ExtractColumns(self):
+        wb = load_workbook(self.fileData)
+        sheet_names = wb.sheetnames
+        print(sheet_names)
+        sheet_ranges = wb["Data"]
+        dfInput = pd.DataFrame(sheet_ranges.values)
+        new_header = dfInput.iloc[0] 
+        dfInput = dfInput[1:] 
+        dfInput.columns = new_header 
+        inputColumns = list(dfInput.columns)
+        return inputColumns
+
+    def getDynamo(self): #
+        return boto3.resource( # This returns the dynamo resource
+        'dynamodb',
+        aws_access_key_id     = 'ASIA4C44A42VGQBUA4MM',
+        aws_secret_access_key = 'S1+c55yJkV8qPPCRta+yrEJ2hGUNAadZpw+iS9pP',
+        aws_session_token     = 'FwoGZXIvYXdzEM7//////////wEaDN9Tloltb6B/i2SwCSKSAtiYC+SEg4t47UPbVep4jR/mMoTXoQQAba2rJVBXWP5m+8qzPM+Sqyjo9uesa2TDzGVA5w2IoSTlZSYMgma+3NhvyldGRTdL0KfEAUA9/hTwV0qaJv/0Yh48MraasQjifPiKMZvBZKlZlMzYJhMeSIOSA0I21aC5z4SdIh5nBT5jWvYKK8yNBxsK7o0YNevcCaqMjgjAHFyYXCbwlCban62rZIDExKCVSZz0oAiyeIrkGQIHfHmND+Uk+g2sjtBF+Dj5sSmdH8ObUF9SVDv1Wlb6IlitSgqhNOoCrDq3xCTF7QGvf5UvXDtdKbW3a8cSB0tvABVjBCOXqmywiJnqBXsS+AuwjpF/RtxazggaGhvie0kowfCPtAYyK3t7noXiFm+DAT/N6e6lfsv13/UKpzbtamotwyWJ99iw9j9/hmUL0rPTPKs=',
+
+        region_name="us-east-1",)
+
+    def Similarity_Score(self, file_input_columns, table_name):
+        dynamodb = self.getDynamo()
+        table = dynamodb.Table(table_name)
+        response = table.scan()
+        items = response['Items']
+
+        # for item in items:
+        #     db_input_columns = item['inputColumns']
+        #     match_count = sum(1 for col in file_input_columns if col in db_input_columns)
+        #     total_unique_columns = len(set(file_input_columns + db_input_columns))
+        #     similarity_percentage = (match_count / total_unique_columns) * 100
+        #     print(f"Similarity Percentage: {similarity_percentage}%")
+
+        #     if similarity_percentage > 90:
+        #         self.SurveillanceDealData()
+        #     else:
+        #         self.PrimaryDealData()
+        for item in items:
+            db_input_columns = item['inputColumns']
+            intersection = len(set(file_input_columns) & set(db_input_columns))
+            union = len(set(file_input_columns) | set(db_input_columns))
+            similarity_percentage = (intersection / union) * 100
+            print(similarity_percentage)
+
+            if similarity_percentage > 90:
+                self.SurveillanceDealData()
+            else:
+                self.PrimaryDealData()
+    
+
+    def SurveillanceDealData(self):
+       
+        print('SurveillanceDealData')
+        pass
+
+    def PrimaryDealData(self):
+        
+        print('PrimaryDealData')
+        pass
+
+
+
+# Example usage
+filepath = r"830365063_830365061_07012024_Primary (1).xlsm"
+processor = DealProcessor(filepath, 'poolId', 'dealId')
+file_input_columns = processor.ExtractColumns()
+table_name = 'psl-db-data-mapper-lab'
+processor.Similarity_Score(file_input_columns, table_name)
